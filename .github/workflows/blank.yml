@@ -1,7 +1,7 @@
- This is the start of the basic workflow to help you get started with github actions
+# This is the start of the basic workflow to help you get started with GitHub actions
 name: CI
 
-# controls when the workflow will run (setting the triggers)
+# Controls when the workflow will run (setting the triggers)
 
 on:
   push:
@@ -14,17 +14,17 @@ on:
   workflow_dispatch: 
 
 jobs:
-  build: #this workflow contains a single job called build
+  build: # This workflow contains a single job called build
     runs-on: ubuntu-latest  # runs on the system ubuntu
       steps:  # sequences of steps to do will be defined here sequentially
 
         - uses: actions/checkout@v3  # # Checks-out/clones your repository under $GITHUB_WORKSPACE
 
-        - name: running a one line script
-          run: echo This is my first workflow with clear cut knowledge on github actions
+        - name: running a one-line script
+          run: echo This is my first workflow with clear-cut knowledge of GitHub actions
 
-        # Runs a multi line command script
-        - name: Run a multi line script
+        # Runs a multi-line command script
+        - name: Run a multi-line script
           run: |
             echo Add other actions to build,
             echo test, and deploy your project.
