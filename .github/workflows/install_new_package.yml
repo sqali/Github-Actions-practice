@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: installing new packages
-    - run: |
+    - name: installing
+      run: |
         sudo apt-get update
         sudo apt-get install scikit-learn
 
