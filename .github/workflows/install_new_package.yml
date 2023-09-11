@@ -1,0 +1,19 @@
+name: Software Update
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  update_package:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: installing new packages
+    - run: |
+        sudo apt-get update
+        sudo apt-get install scikit-learn
+
+
