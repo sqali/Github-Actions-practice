@@ -1,0 +1,23 @@
+name: Introduction to environmental variables
+
+# For this particular workflow the below are the environmental variables accessible to it
+on:
+    push:
+        branches: main
+    pull_request:
+        branches: main
+
+env:
+    Pipe: CI/CD
+
+# Jobs defined as build under which there is a environmental variables called Stage with a value of dev
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        env:
+            STAGE: dev
+            GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        steps:
+        - name: Testing it
+          run: |
+           echo successfully created Github token and defined environmental variables
