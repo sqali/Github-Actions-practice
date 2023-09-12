@@ -1,0 +1,27 @@
+name: Create Issue using GitHub Actions
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to the branch you want to trigger the workflow on
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Create Issue
+        env:
+            STAGE: dev
+            GH_PAT: ${{ secrets.TOKEN_GITHUB }}
+        run: |
+          # Use the GH_PAT secret to authenticate with the GitHub API
+          curl -X POST -H "Authorization: token $GH_PAT" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues \
+            -d '{
+              "title": "New Issue",
+              "body": "This is the issue description."
+            }'
