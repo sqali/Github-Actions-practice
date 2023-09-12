@@ -21,3 +21,12 @@ jobs:
         - name: Testing it
           run: |
            echo successfully created Github token and defined environmental variables
+
+    report-details:
+        runs-on: ubuntu-latest
+        steps:
+        - name: reporting the details of github workflow URL and the runner os using default env variables
+          run: echo ${{ github.server_url }}/${{ github.repository }}/actions/run/${{ github.run_id }}
+        - name: checking the os of the runner
+          if: runner.os != 'Windows'
+          run: echo The system is not Windows, it is ${{ runner.os }}
