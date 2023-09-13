@@ -2,9 +2,9 @@ name: Testing different deployment environments on GitHub
 
 # There is an issue with this workflow as it will create an issue when the pull request is created and also when the pull request is merged
 
-# That is why another if condition is imposed within the steps to check if an issue with the similar name already exists in the repo
+# That is why another if condition is imposed within the steps to check if an issue with a similar name already exists in the repo
 
-# if it does then the issue will not be created an skipped
+# If it does then the issue will not be created and skipped
 
 on:
     push:
@@ -15,10 +15,10 @@ on:
 
 # Adding comments to explain the installation check of GH CLI and its subsequent commands
 # if ! command checks if gh command exists in the path if no then it returns false or error which then is reverted by the ! logical not operator
-# then error or ouput which is generated from this is redirected to &> /dev/null where it will dispose them off (/dev/null) 
-# &> is responsible for redirection of errors and outputs
-# then we check the GPG keys with specific fingerpring from the ubuntu server to authenticate the integrity of the software packages being installed
-# apt-add-repository is then added to the ubuntu packages so that it can installed directly using apt
+# Then error or output that is generated from this is redirected to &> /dev/null where it will dispose of them (/dev/null) 
+# &> is responsible for the redirection of errors and outputs
+# Then we check the GPG keys with specific fingerprints from the Ubuntu server to authenticate the integrity of the software packages being installed
+# apt-add-repository is then added to the Ubuntu packages so that it can installed directly using apt
 
 jobs:
     create-issue-gh-cli:
@@ -28,7 +28,7 @@ jobs:
           uses: actions/checkout@v2
           
         - name: Installing GitHub CLI if not present in the system
-          # Installing github cli if not insatlled
+          # Installing github cli if not installed
           run: |
             if ! command -v gh &> /dev/null; then 
                 echo "GitHub CLI not found. Installing..."
@@ -37,13 +37,10 @@ jobs:
                 sudo apt update
                 sudo apt install gh
             fi
-
-        - name: Checking if the issue already exists in the repository
-          id: check-issue 
           # used to uniquely identify steps, you can see the use below
           # The --state all option includes issues in all states (open and closed).
           # The --title "Second Issue" option filters issues by title.
-          # The --json number title option specifies the fields to include in the JSON output, which are "number" and "title."
+          # The --JSON number title option specifies the fields to include in the JSON output, which are "number" and "title."
           # The > issue_list.json part redirects the output of this command to a file named "issue_list.json," saving the JSON data to that file.
           # ISSUE_COUNT=$(jq length issue_list.json):
 
@@ -52,13 +49,17 @@ jobs:
           # echo "::set-output name=ISSUE_COUNT::$ISSUE_COUNT":
 
           # This line sets an output variable named "ISSUE_COUNT" with the value stored in the ISSUE_COUNT variable. This allows other steps in your GitHub Actions workflow to access and use this value.
+        - name: Fetching all issues
+          run: gh issue list --state all --json number title > issue_list.json
+          
+        - name: Check if the issue exists with the same title 
+          id: check-issue
           run: |
-            gh issue list --state all --title "Second Issue" --json number title > issue_list.json
-            ISSUE_COUNT=$(jq length issue_list.json)
-            echo "::set-output name=ISSUE_COUNT::$ISSUE_COUNT"
+              ISSUE_COUNT=$(jq '[.[] | select(.title == "Second Issue")] | length' issue_list.json)
+              echo "::set-output name=ISSUE_COUNT::$ISSUE_COUNT"
             
         - name: Authenticating Github using github secret token
-          # below condition to check if the issue already exists, if not then it procceds
+          # below condition to check if the issue already exists, if not then it proceeds
           if: steps.check-issue.outputs.ISSUE_COUNT == 0
           run: |
             # Authenticate with GitHub using your Personal Access Token (PAT)
