@@ -1,5 +1,11 @@
 name: Testing different deployment environments on GitHub
 
+# There is an issue with this workflow as it will create an issue when the pull request is created and also when the pull request is merged
+
+# That is why another if condition is imposed within the steps to check if an issue with the similar name already exists in the repo
+
+# if it does then the issue will not be created an skipped
+
 on:
     push:
         branches: main
@@ -20,6 +26,7 @@ jobs:
         steps:
         - name: Checks out repo
           uses: actions/checkout@v2
+          
         - name: Installing GitHub CLI if not present in the system
           # Installing github cli if not insatlled
           run: |
@@ -30,7 +37,29 @@ jobs:
                 sudo apt update
                 sudo apt install gh
             fi
+
+        - name: Checking if the issue already exists in the repository
+          id: check-issue 
+          # used to uniquely identify steps, you can see the use below
+          # The --state all option includes issues in all states (open and closed).
+          # The --title "Second Issue" option filters issues by title.
+          # The --json number title option specifies the fields to include in the JSON output, which are "number" and "title."
+          # The > issue_list.json part redirects the output of this command to a file named "issue_list.json," saving the JSON data to that file.
+          # ISSUE_COUNT=$(jq length issue_list.json):
+
+          # This line uses the jq command to read the "issue_list.json" file and calculate the length of the JSON array, effectively counting the number of issues.
+          # The result is stored in the ISSUE_COUNT variable.
+          # echo "::set-output name=ISSUE_COUNT::$ISSUE_COUNT":
+
+          # This line sets an output variable named "ISSUE_COUNT" with the value stored in the ISSUE_COUNT variable. This allows other steps in your GitHub Actions workflow to access and use this value.
+          run: |
+            gh issue list --state all --title "Second Issue" --json number title > issue_list.json
+            ISSUE_COUNT=$(jq length issue_list.json)
+            echo "::set-output name=ISSUE_COUNT::$ISSUE_COUNT"
+            
         - name: Authenticating Github using github secret token
+          # below condition to check if the issue already exists, if not then it procceds
+          if: steps.check-issue.outputs.ISSUE_COUNT == 0
           run: |
             # Authenticate with GitHub using your Personal Access Token (PAT)
             gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
