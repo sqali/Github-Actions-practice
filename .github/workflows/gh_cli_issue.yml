@@ -18,6 +18,8 @@ jobs:
     create-issue-gh-cli:
         runs-on: ubuntu-latest
         steps:
+        - name: Checks out repo
+          uses: actions/checkout@v2
         - name: Installing GitHub CLI if not present in the system
           # Installing github cli if not insatlled
           run: |
