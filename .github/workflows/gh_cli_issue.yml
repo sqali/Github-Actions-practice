@@ -1,4 +1,4 @@
-name: Testing different deployment environments on GitHub
+name: Creating Issues with gh commands and preventing duplication of issues
 
 # There is an issue with this workflow as it will create an issue when the pull request is created and also when the pull request is merged
 
@@ -37,33 +37,18 @@ jobs:
                 sudo apt update
                 sudo apt install gh
             fi
-          # used to uniquely identify steps, you can see the use below
-          # The --state all option includes issues in all states (open and closed).
-          # The --title "Second Issue" option filters issues by title.
-          # The --JSON number title option specifies the fields to include in the JSON output, which are "number" and "title."
-          # The > issue_list.json part redirects the output of this command to a file named "issue_list.json," saving the JSON data to that file.
-          # ISSUE_COUNT=$(jq length issue_list.json):
-
-          # This line uses the jq command to read the "issue_list.json" file and calculate the length of the JSON array, effectively counting the number of issues.
-          # The result is stored in the ISSUE_COUNT variable.
-          # echo "::set-output name=ISSUE_COUNT::$ISSUE_COUNT":
-
-          # This line sets an output variable named "ISSUE_COUNT" with the value stored in the ISSUE_COUNT variable. This allows other steps in your GitHub Actions workflow to access and use this value.
         - name: Fetching all issues
-          run: gh issue list --state all --json number title > issue_list.json
+          run: gh issue list --state all > issue_list.txt
           
         - name: Check if the issue exists with the same title 
-          id: check-issue
           run: |
-              ISSUE_COUNT=$(jq '[.[] | select(.title == "Second Issue")] | length' issue_list.json)
-              echo "::set-output name=ISSUE_COUNT::$ISSUE_COUNT"
-            
-        - name: Authenticating Github using github secret token
-          # below condition to check if the issue already exists, if not then it proceeds
-          if: steps.check-issue.outputs.ISSUE_COUNT == 0
-          run: |
-            # Authenticate with GitHub using your Personal Access Token (PAT)
-            gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
-            
-            # Create a new issue using GitHub CLI
-            gh issue create --title "Second Issue" --body "This issue has been created by installing GH CLI in workflow and then using GH commands"
+            if grep -q "Second Issue" issue_list.txt; then
+                echo "Issue already exists. Skipping creation."
+            else
+                echo "Creating a new issue..."
+                echo "Authenticating with GitHub using Personal Access Token"
+                gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
+                echo "Authenticated successfully"
+                echo "Creating new issue"
+                gh issue create --title "Second Issue" --body "This issue has been created by installing GH CLI in workflow and then using GH commands"
+            fi
