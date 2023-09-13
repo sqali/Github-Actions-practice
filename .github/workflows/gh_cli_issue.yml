@@ -37,6 +37,12 @@ jobs:
                 sudo apt update
                 sudo apt install gh
             fi
+            
+        - name: Authentication with GitHub using PAT
+          run: |
+              echo "Authenticating with GitHub using Personal Access Token"
+              gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
+              
         - name: Fetching all issues
           run: gh issue list --state all > issue_list.txt
           
@@ -46,9 +52,5 @@ jobs:
                 echo "Issue already exists. Skipping creation."
             else
                 echo "Creating a new issue..."
-                echo "Authenticating with GitHub using Personal Access Token"
-                gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
-                echo "Authenticated successfully"
-                echo "Creating new issue"
                 gh issue create --title "Second Issue" --body "This issue has been created by installing GH CLI in workflow and then using GH commands"
             fi
