@@ -1,0 +1,39 @@
+name: Testing different deployment environments on GitHub
+
+on:
+    push:
+        branches: main
+    pull_request:
+        branches: main
+    workflow_dispatch:
+
+# Adding comments to explain the installation check of GH CLI and its subsequent commands
+# if ! command checks if gh command exists in the path if no then it returns false or error which then is reverted by the ! logical not operator
+# then error or ouput which is generated from this is redirected to &> /dev/null where it will dispose them off (/dev/null) 
+# &> is responsible for redirection of errors and outputs
+# then we check the GPG keys with specific fingerpring from the ubuntu server to authenticate the integrity of the software packages being installed
+# apt-add-repository is then added to the ubuntu packages so that it can installed directly using apt
+
+jobs:
+    create-issue-gh-cli:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checks out repo
+          uses: actions/checkout@v2
+        - name: Installing GitHub CLI if not present in the system
+          # Installing github cli if not insatlled
+          run: |
+            if ! command -v gh &> /dev/null; then 
+                echo "GitHub CLI not found. Installing..."
+                sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+                sudo apt-add-repository https://cli.github.com/packages
+                sudo apt update
+                sudo apt install gh
+            fi
+        - name: Authenticating Github using github secret token
+          run: |
+            # Authenticate with GitHub using your Personal Access Token (PAT)
+            gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
+            
+            # Create a new issue using GitHub CLI
+            gh issue create --title "Second Issue" --body "This issue has been created by installing GH CLI in workflow and then using GH commands"
