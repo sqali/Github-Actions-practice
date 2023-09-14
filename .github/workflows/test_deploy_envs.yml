@@ -1,0 +1,51 @@
+name: Deployments example
+
+on:
+    push:
+      branches: [ "main", "dev" ]
+    pull_request:
+      branches: main
+  
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+  deploy-dev:  
+      # needs means it needs the build-and-test job to succeed to start with this job
+      needs: [build-and-test]
+      if: github.ref == 'refs/heads/dev'
+        
+      runs-on: ubuntu-latest
+      environment:
+        name: dev
+        url: https://github.com/${{ github.repository }}/releases/tag/v${{ vars.DEV_VERSION }}    
+      
+      steps:
+        - name: release to dev
+          uses: softprops/action-gh-release@v0.1.15
+          with:
+            tag_name: v${{ vars.DEV_VERSION }}
+            token: ${{ secrets.DEV_TOKEN }}
+            prerelease: true
+            draft: true
+            name: dev
+            
+  deploy-prod:
+        needs: [build-and-test]
+        if: github.ref == 'refs/heads/main'
+        
+        runs-on: ubuntu-latest
+        environment:
+          name: production
+          url: https://github.com/${{ github.repository }}/releases/tag/v${{ vars.PROD_VERSION }}
+    
+        steps:        
+          - name: GH Release
+            uses: softprops/action-gh-release@v0.1.15
+            with:
+              tag_name: v${{ vars.PROD_VERSION }}
+              token: ${{ secrets.PROD_TOKEN }}
+              generate_release_notes: true
+              name: Production
