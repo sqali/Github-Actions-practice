@@ -1,0 +1,75 @@
+# GitHub Actions provides syntax for capturing, sharing, and accessing inputs and outputs between jobs and steps in workflows. 
+# Additionally, it provides functionality for managing intermediate files or modules, which it calls artifacts. 
+# Actions provides the ability to persist artifacts created during a workflow run. 
+# Jobs within the same workflow can then access the artifacts and use them, like the projects in a pipeline.
+# Working with inputs and outputs in workflows
+# Defining artifacts
+# Uploading and downloading artifacts
+# Using caches in GitHub actions
+
+# In the following sections, 
+# I’ll show you how to define and reference inputs, capture and share outputs from a step, capture and share outputs from a job
+#  and capture output defined for an action called in a step.
+
+name: Managing data withing workflows
+
+on:
+  # Allows you to run this workflow from another workflow
+  workflow_call:
+    inputs:
+      title:
+        required: true
+        type: string
+      body:
+        required: true
+        type: string
+
+  # Allows you to call this manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Issue title'
+        required: true
+      body:
+        description: 'Issue body'
+        required: true
+
+jobs:
+  create_issue_on_failure:
+    runs-on: ubuntu-latest
+  
+    permissions:
+      issues: write
+    steps:
+      - name: Create issue using REST API
+        run: |
+          # Send an HTTP POST request to create a GitHub issue using the REST API
+          curl --request POST \
+          --url https://api.github.com/repos/${{ github.repository }}/issues \
+          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "title": "Failure: ${{ inputs.title }}",
+            "body": "Details: ${{ inputs.body }}"
+          }' \
+          --fail
+
+# This section specifies the triggers for when the workflow should run. It has two trigger events:
+
+# workflow_call: This event allows you to run this workflow from another workflow. It expects two input parameters: title and body, both of which are required and have a data type of string.
+
+# workflow_dispatch: This event allows you to manually trigger the workflow from the GitHub Actions tab. It also expects two input parameters, title and body, both of which are required and have descriptions for better user understanding.
+
+# Here, we define a single job named create_issue_on_failure. This job will run on the latest Ubuntu environment (ubuntu-latest) when triggered.
+
+# permissions are specified to grant the workflow the necessary permissions to interact with GitHub issues. In this case, it has the issues: write permission, which allows the workflow to create issues in the repository.
+
+# Within the create_issue_on_failure job, a step named Create issue using REST API is defined.
+
+# In this step, a shell script is executed using the run attribute. This script uses the curl command to send an HTTP POST request to GitHub's REST API to create a new issue in the same repository where the workflow is running.
+
+# It uses the provided secrets.GITHUB_TOKEN for authorization, which is a token provided by GitHub Actions for authentication and authorization.
+
+# The --data parameter in the curl command sends a JSON payload to create the issue. The title and body of the issue are provided using the ${{ inputs.title }} and ${{ inputs.body }} placeholders, respectively. These values are obtained from the inputs defined in the trigger event.
+
+# The --fail flag ensures that the step fails if the HTTP request fails.
