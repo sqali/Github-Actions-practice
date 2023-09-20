@@ -53,6 +53,51 @@ jobs:
             "body": "Details: ${{ inputs.body }}"
           }' \
           --fail
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      build-stage: ${{ steps.set-debug-stage.outputs.Build }}
+    steps:
+      - name: Set debug
+        id: set-debug-stage
+        run: echo "Build=successfully built" >> $GITHUB_OUTPUT
+
+      # This job is especially for capturing output from steps
+      # What it does: It adds a line of text, "BUILD_STAGE=debug," 
+      # to a special environment variable called $GITHUB_OUTPUT.
+      # This line essentially sets a variable BUILD_STAGE to the value "debug."
+
+      - name: Get debug output
+        run: echo "We find the value of the step variable to be ${{ steps.set-debug-stage.outputs.build }}"
+  
+  report:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Accessing output from the previous job
+        run: echo "We have successfully extracted the ouput from the previous job and printed it using ${{ needs.setup.outputs.build-stage }}"
+
+  action-step:
+    runs-on: ubuntu-latest
+    outputs:
+      changelog:
+      clean_changelog:
+      version:
+
+    steps:
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3.14.0
+      
+  build:
+    runs-on: ubuntu-latest
+    needs: action-step
+    outputs:
+      special-action-tag: ${{ needs.action-step.outputs.version }}
+    
+    steps:
+      - name: Print the version number from the previous step
+        run: echo "I have now extracted the version number from the prevoous step and it turns out to be $special-action-tag"
 
 # This section specifies the triggers for when the workflow should run. It has two trigger events:
 
