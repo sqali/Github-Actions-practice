@@ -1,0 +1,53 @@
+# Here we will learn about dealing with artifacts in workflows
+# Artifacts are nothing but simply files aor collection of files created as a result of the job or workflow and persisted in GitHub
+# By default their retention period is around 90 days (Public repo), 400 days for private repo
+
+# To persist an artifact created by a 
+# job there are additional steps you must add to your workflow. 
+# The next section explains how that works. 
+
+name: Uploading Artifacts Workflow
+
+on:
+    workflow_dispatch:
+
+jobs:
+    uploading-artifact-file:
+        runs-on: Ubuntu-latest
+        steps:
+            - name: Creating two files
+              run: |
+                mkdir -p path/to/artifact
+                echo "My name is qaiser ali" >> path/to/artifact/qaiser.txt
+                echo "I am learning GitHub actions" >> path/to/artifact/actions.txt
+
+            - name: Uploading the artifacts
+              uses: actions/upload-artifact@v3
+              with: 
+                name: Artifact Experimenting
+                # This will upload the entire directory, you can also upload a particular file
+                path: path/to/artifact
+                # You can specify the number of days to retain the file
+                retention-days: 1
+                # There is also another argument called if-no-files-found what to do, you can
+                # use the below options
+                # warn: output a warning but do not fail the action
+                # error: fail with action with an error message
+                # ignore: do not output any warnings or errors, the action does not fail
+
+    Downloading-artifacts:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Download a Build Artifact
+              uses: actions/download-artifact@v2.1.1
+            
+            - name: Viewing the artifacts content
+              run: |
+                cat path/to/artifact/qaiser.txt
+                cat path/to/artifact/actions.txt
+
+        
+# The artifact has been uploaded to GitHub (via the upload-artifact step) and is now
+# available to download manually, delete, or use with another job in the same
+# workflow. Downloading it manually is as simple as clicking the artifact name.
+# Deleting it is as simple as clicking the trash can icon on the right side and confirming that you do want to delete it.
