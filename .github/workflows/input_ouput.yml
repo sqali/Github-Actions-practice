@@ -83,6 +83,9 @@ jobs:
       action-version-tag: ${{ steps.changelog.outputs.version }}
 
     steps:
+      - name: Checking out the repository
+        uses: actions/checkout@v2
+        
       - name: Conventional Changelog Action
         id: changelog
         uses: TriPSs/conventional-changelog-action@v3.14.0
@@ -98,7 +101,7 @@ jobs:
 
 # Here, we define a single job named create_issue_on_failure. This job will run on the latest Ubuntu environment (ubuntu-latest) when triggered.
 
-# permissions are specified to grant the workflow the necessary permissions to interact with GitHub issues. In this case, it has the issues: write permission, which allows the workflow to create issues in the repository.
+# permissions are specified to grant the workflow the necessary permissions to interact with GitHub issues. In this case, it has the issue: of write permission, which allows the workflow to create issues in the repository.
 
 # Within the create_issue_on_failure job, a step named Create issue using REST API is defined.
 
