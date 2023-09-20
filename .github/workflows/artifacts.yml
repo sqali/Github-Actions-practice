@@ -41,12 +41,12 @@ jobs:
             - name: Download a Build Artifact
               uses: actions/download-artifact@v2.1.1
               with:
-                name: Artifact Experimenting
+                name: Artifact-Experimenting
             
             - name: Viewing the artifacts content
               run: |
-                cat path/to/artifact/Artifact-Experimenting/qaiser.txt
-                cat path/to/artifact/Artifact-Experimenting/actions.txt
+                cat ./Artifact-Experimenting/qaiser.txt
+                cat ./Artifact-Experimenting/actions.txt
 
         
 # The artifact has been uploaded to GitHub (via the upload-artifact step) and is now
