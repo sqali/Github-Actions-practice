@@ -75,29 +75,20 @@ jobs:
     needs: setup
     steps:
       - name: Accessing output from the previous job
-        run: echo "We have successfully extracted the ouput from the previous job and printed it using ${{ needs.setup.outputs.build-stage }}"
+        run: echo "We have successfully extracted the output from the previous job and printed it using ${{ needs.setup.outputs.build-stage }}"
 
   action-step:
     runs-on: ubuntu-latest
     outputs:
-      changelog:
-      clean_changelog:
-      version:
+      action-version-tag: ${{ steps.changelog.outputs.version }}
 
     steps:
       - name: Conventional Changelog Action
         id: changelog
         uses: TriPSs/conventional-changelog-action@v3.14.0
-      
-  build:
-    runs-on: ubuntu-latest
-    needs: action-step
-    outputs:
-      special-action-tag: ${{ needs.action-step.outputs.version }}
-    
-    steps:
+        
       - name: Print the version number from the previous step
-        run: echo "I have now extracted the version number from the prevoous step and it turns out to be $special-action-tag"
+        run: echo "I have now extracted the version number from the previous step and it turns out to be $action-version-tag"
 
 # This section specifies the triggers for when the workflow should run. It has two trigger events:
 
