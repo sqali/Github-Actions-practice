@@ -24,7 +24,7 @@ jobs:
             - name: Uploading the artifacts
               uses: actions/upload-artifact@v3
               with: 
-                name: Artifact Experimenting
+                name: Artifact-Experimenting
                 # This will upload the entire directory, you can also upload a particular file
                 path: path/to/artifact
                 # You can specify the number of days to retain the file
@@ -45,8 +45,8 @@ jobs:
             
             - name: Viewing the artifacts content
               run: |
-                cat path/to/artifact/qaiser.txt
-                cat path/to/artifact/actions.txt
+                cat path/to/artifact/Artifact-Experimenting/qaiser.txt
+                cat path/to/artifact/Artifact-Experimenting/actions.txt
 
         
 # The artifact has been uploaded to GitHub (via the upload-artifact step) and is now
