@@ -46,8 +46,8 @@ jobs:
             
             - name: Viewing the artifacts content
               run: |
-                cat /home/runner/work/Github-Actions-practice/Github-Actions-practice/Artifact-Experimenting/path/to/artifact/qaiser.txt
-                cat /home/runner/work/Github-Actions-practice/Github-Actions-practice/Artifact-Experimenting/path/to/artifact/actions.txt
+                cat /home/runner/work/Github-Actions-practice/Github-Actions-practice/path/to/artifact/qaiser.txt
+                cat /home/runner/work/Github-Actions-practice/Github-Actions-practice/path/to/artifact/actions.txt
 
         
 # The artifact has been uploaded to GitHub (via the upload-artifact step) and is now
