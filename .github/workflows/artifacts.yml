@@ -47,6 +47,8 @@ jobs:
             - name: Viewing the artifacts content
               run: |
                 ls -R
+                cat ./qaiser.txt
+                cat ./actions.txt
 
         
 # The artifact has been uploaded to GitHub (via the upload-artifact step) and is now
