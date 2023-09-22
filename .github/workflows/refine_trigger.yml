@@ -18,6 +18,9 @@ on:
         paths:
             # this will make sure that the workflow is triggered when a certain file path is triggered such as the go file below
             - '**.go'
+        # For the particular above scenario, it will only execute or trigger the workflow only if
+        # conditions from each branches, tags, paths are matached. If even one of the these fields are not
+        # present in the repository then it will not be triggered
 
 jobs:
     checking:
