@@ -11,13 +11,13 @@ jobs:
               env:
                  cache-name: go-cache
               with:
-              path: |
-                ~/.cache/go-build
-                ~/go/pkg/mod
-              key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
-              restore-keys: |
-                ${{ runner.os }}-build-${{ env.cache-name }}-
-                ${{ runner.os }}-build-
-                ${{ runner.os }}-
+                path: |
+                    ~/.cache/go-build
+                    ~/go/pkg/mod
+                key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
+                restore-keys: |
+                    ${{ runner.os }}-build-${{ env.cache-name }}-
+                    ${{ runner.os }}-build-
+                    ${{ runner.os }}-
 
 # this is just an example on how to use cache system, to actually run this you need files such as golang to execute and test it
