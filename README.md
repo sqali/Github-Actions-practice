@@ -65,13 +65,13 @@ You can’t include both the inclusive and exclusive keywords for the same event
 You can use the below to ignore certain branches and tags when triggers happen
 
 ```
-        branches-ignore:
-            - main
-            - 'prod/*'
-        tags-ignore:
-            - 'rc*'
-        paths-ignore:
-            - 'data/**' # will not get triggered if anything is changed within the data subdirectory
+branches-ignore:
+    - main
+    - 'prod/*'
+tags-ignore:
+    - 'rc*'
+paths-ignore:
+    - 'data/**' # will not get triggered if anything is changed within the data subdirectory
 ```
 
 ```
@@ -80,6 +80,7 @@ on:
     paths:
       - 'module1/**'
       - '!module1/data/**'
+      
 # if anything is changed within module1 then it will be triggered but if the change is also within module1/data then it will not triggered as it has been specified
 ```
 
