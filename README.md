@@ -51,3 +51,38 @@ The first option requires more configuration but gives you explicit control over
 There’s the on keyword introducing the section of events that trigger running this workflow and then the issues trigger below that. It may look a bit strange to have a trigger with simply an ending colon and nothing after that, but it is valid syntax. The implication of this is that this workflow will be triggered for any and every kind of activity that occurs for an issue, such as creation, updating, or deletion.
 
 If this is what you need, that’s great. But, if you need to refine more when your workflow runs, there are options you can supply for the triggers in the on section. These are referred to as activity types.
+
+## Refining Triggers
+
+Some triggering events allow using filters to further define when a workflow will run in response to the event. A filter is specified using a keyword that defines the type of entity to filter, and one or more strings that are specific names or patterns. The strings can use standard glob syntax (*, **, ?, !, +, etc.) to match multiples.
+
+A good example is qualifying which branches and tags cause a workflow to run when a push event occurs. You can filter a list of branches and tags for the push event with wildcards for pattern matching:
+
+You can also specify a set of branches to exclude via the keyword branches-ignore, tags to exclude via tags-ignore, or paths to exclude via paths-ignore. The use case for this is when it’s easier or more desirable to specify a set of branches or tags in your repository not to trigger off of rather than a set to trigger off of.
+
+You can’t include both the inclusive and exclusive keywords for the same event (for example, you can’t include both branches and branches-ignore for a push trigger).
+
+You can use the below to ignore certain branches and tags when triggers happen
+
+```
+        branches-ignore:
+            - main
+            - 'prod/*'
+        tags-ignore:
+            - 'rc*'
+        paths-ignore:
+            - 'data/**' # will not get triggered if anything is changed within the data subdirectory
+```
+
+```
+on:
+  push:
+    paths:
+      - 'module1/**'
+      - '!module1/data/**'
+# if anything is changed within module1 then it will be triggered but if the change is also within module1/data then it will not triggered as it has been specified
+```
+
+If you’re not familiar with the meaning of the ** symbol, in glob syntax, it matches filenames and directories recursively. Essentially, it matches on anything in a tree structure under the specified path.
+
+If you are triggering off of a push or pull request event, you can refine those more to only trigger off of changes to particular file paths
