@@ -1,0 +1,16 @@
+# Triggering changes with issues
+
+name: Advanced Triggering
+
+on:
+    # Triggers the workflow if any kind of activity is done on the issue (creating, updating, deleting)
+    issues:
+        # the list of types are available in the github documentation- # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#issues
+        types:
+            [edited, closed]
+
+jobs:
+    notify-for-issue:
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo "Something happened with an issue, an issue was closed"

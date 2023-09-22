@@ -45,4 +45,9 @@ The first option requires more configuration but gives you explicit control over
 | input      | enableCrossOs​Arch⁠ive | Optional boolean—allows Windows runners to save or restore caches that can be restored or saved respectively on other platforms                                   |
 | input      | fail-on-cache-miss   | Fail workflow if cache entry is not found                                                                                                                         |
 | input      | lookup-only          | See if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache                                                               |
-| output     | cache-hit            | Simple boolean to indicate if an exact match is found for a key                                                                                                    |
+| output     | cache-hit            | Simple boolean to indicate if an exact match is found for a key                                
+
+## Advanced Triggering Workflows
+There’s the on keyword introducing the section of events that trigger running this workflow and then the issues trigger below that. It may look a bit strange to have a trigger with simply an ending colon and nothing after that, but it is valid syntax. The implication of this is that this workflow will be triggered for any and every kind of activity that occurs for an issue, such as creation, updating, or deletion.
+
+If this is what you need, that’s great. But, if you need to refine more when your workflow runs, there are options you can supply for the triggers in the on section. These are referred to as activity types.
