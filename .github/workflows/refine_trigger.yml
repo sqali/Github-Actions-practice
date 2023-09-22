@@ -1,0 +1,27 @@
+name: Refine Triggers
+
+on:
+    workflow_dispatch:
+    push:
+        # run workflow in all the branches called main and those starting with rel/v
+        # also applicable for tags starting with v1. and beta
+        # rel/** ensures all the branches match that start with rel
+        # !rel/**-beta ensures all the branches that start with rel and end beta are excluded
+        # ** is used for recursive matches that are within directories and directories
+        branches:
+            - main
+            - '!rel/**-beta'
+            - 'rel/**'
+        tags:
+            - v1.*
+            - beta
+        paths:
+            # this will make sure that the workflow is triggered when a certain file path is triggered such as the go file below
+            - '**.go'
+
+jobs:
+    checking:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Testing the refine trigger
+              run: echo "workflow successfully triggered"
