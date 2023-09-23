@@ -87,3 +87,33 @@ on:
 If you’re not familiar with the meaning of the ** symbol, in glob syntax, it matches filenames and directories recursively. Essentially, it matches on anything in a tree structure under the specified path.
 
 If you are triggering off of a push or pull request event, you can refine those more to only trigger off of changes to particular file paths
+
+## Triggering workflows without a change
+
+workflow_dispatch: This event allows you to manually trigger a workflow from the GitHub Actions tab. You can provide input parameters and run the workflow on-demand. It doesn't automatically run; you have to initiate it manually.
+
+workflow_call: This event allows you to call a reusable workflow from another workflow. You can specify input parameters, and the called workflow runs as part of the calling workflow. It can be used when you want to reuse a set of workflow steps across different workflows.
+
+workflow_run: This event allows you to trigger the run of one workflow based on another workflow's execution. You can specify conditions such as which workflow to trigger (workflows), when to trigger it (types), and on which branches or conditions it should run. For example, you can set it up so that when a workflow named "Pipeline" completes, it triggers another workflow to perform additional tasks, such as deployment.
+Here's an example scenario for workflow_run:
+
+```
+on:
+  workflow_run:
+    workflows: ["Pipeline"]
+    types: [completed]
+    branches:
+      - 'rel/**'
+      - '!rel/**-preprod'
+```
+
+In this example, when a workflow named "Pipeline" completes (either successfully or with a failure), it triggers the defined workflow to run. It only runs on branches starting with "rel" but excludes branches ending with "-preprod."
+
+repository_dispatch: This event allows external events to trigger workflows in your repository. You can set up custom events and payloads that can be used by external systems or scripts to trigger specific workflows. It's useful when you want to automate workflows based on events outside of GitHub. For example, you could trigger a deployment workflow when a specific event occurs in an external CI/CD system.
+Here's a high-level scenario for repository_dispatch:
+
+You have a CI/CD system external to GitHub.
+This external system detects a new version of your software.
+The CI/CD system sends a custom "release" event to your GitHub repository using the repository_dispatch API.
+GitHub triggers a specific workflow in your repository, such as a deployment workflow, in response to the custom "release" event.
+These events give you flexibility in automating workflows in response to various conditions, whether it's manual initiation (workflow_dispatch), reusing workflows in other workflows (workflow_call), or responding to external events (workflow_run and repository_dispatch).

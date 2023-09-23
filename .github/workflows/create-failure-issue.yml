@@ -1,0 +1,25 @@
+name: Main workflow that will call another workflow
+
+on:
+    workflow_dispatch:
+
+jobs:
+    test-run:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Testing it
+              run: echo "Run successful"
+    count-args:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Testing the second job
+              run: echo "Ran the second job successfully"
+
+    create-issue-on-failure:
+
+        needs: [test-run, count-args]
+        if: always() && failure()
+        uses: ./.github/workflows/trigger_without_change.yml
+        with:
+          title: "Automated workflow failure issue for commit ${{ github.sha }}"
+          body: "This issue was automatically created by the GitHub Action workflow ** ${{ github.workflow }} **"
