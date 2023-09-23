@@ -207,3 +207,36 @@ concurrency:
   group: ${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 ```
+
+## Running a workflow with a matrix
+
+Sometimes, you may need to execute the same workflow multiple times based on different dimensions of data. For example, perhaps you need to run the same test cases across multiple browsers. Or you need to run the test cases across multiple browsers on each of multiple operating systems. For these kinds of cases, you can leverage the matrix strategy within GitHub Actions. You specify this strategy for the jobs in your workflow and define a matrix of dimensions you want to execute across. GitHub Actions will then generate jobs for each combination and execute them accordingly.
+
+The continue-on-error setting for jobs and steps can be used with the matrix strategy to allow the matrix processing to continue iterating through the combinations defined for your matrix. When this is specified, if one of the combinations fails, this will allow the workflow to continue processing the rest of the matrix.
+
+matrix can take multiple arguments such as below example of code:
+
+```
+name: Create demo issue 3
+
+on:
+  push:
+
+jobs: 
+  create-new-issue:
+    strategy:
+      matrix:
+        prod: [prod1, prod2]
+        level: [dev, stage, prod]
+    uses: rndrepos/common/.github/workflows/create-issue.yml@v1
+    secrets: inherit
+    with:
+      title: "${{ matrix.prod}} issue"
+      body: "Update for ${{ matrix.level}}"
+  report-issue-number:
+    runs-on: ubuntu-latest
+    needs: create-new-issue
+    steps:
+      - run: echo ${{ needs.create-new-issue.outputs.issue-num }}
+
+```
