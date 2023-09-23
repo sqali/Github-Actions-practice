@@ -18,10 +18,10 @@ Upload Build artifacts arguments description table
 
 | Name              | Required | Default                                     | Description                                                                                                                                                    |
 |-------------------|----------|---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| name              | yes      | artifact                                    | Name of the artifact.                                                                                                                                          |
-| path              | yes      | none                                        | File system path to what you want to upload.                                                                                                                   |
-| if-no-files-found | no       | warn                                        | What to do if there are no files in the path you specified: a value of error means stop with an error; a value of warn means report the issue but don’t fail; a value of ignore means don’t fail and don’t print a warning—just keep going. |
-| retention-days    | no       | 0 (which means use the repository default; see description) | Number of days before the artifact will expire (be removed from GitHub). Can be between 1 and 90 to indicate a specific number of days or 0 to use the default.  |
+| ```name```             | yes      | artifact                                    | Name of the artifact.                                                                                                                                          |
+| ```path```            | yes      | none                                        | File system path to what you want to upload.                                                                                                                   |
+| ```if-no-files-found``` | no       | warn                                        | What to do if there are no files in the path you specified: a value of error means stop with an error; a value of warn means report the issue but don’t fail; a value of ignore means don’t fail and don’t print a warning—just keep going. |
+| ```retention-days```    | no       | 0 (which means use the repository default; see description) | Number of days before the artifact will expire (be removed from GitHub). Can be between 1 and 90 to indicate a specific number of days or 0 to use the default.  |
 
 
 ## Caches in GitHub Actions
@@ -38,14 +38,14 @@ The first option requires more configuration but gives you explicit control over
 
 | Function   | Name                 | Description                                                                                                                                                        |
 |------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| input      | path                 | A list of files/directories/patterns that specify which file system objects to include in the cache and restore from it                                             |
-| input      | key                  | An explicit key to use for saving and restoring the cache                                                                                                          |
-| input      | restore-keys         | An ordered list of keys to check to indicate that a match occurred with the key; a match here is referred to as a cache hit                                         |
-| input      | upload-chunk-size    | Chunk size used to split up large files during upload, in bytes                                                                                                    |
-| input      | enableCrossOs​Arch⁠ive | Optional boolean—allows Windows runners to save or restore caches that can be restored or saved respectively on other platforms                                   |
-| input      | fail-on-cache-miss   | Fail workflow if cache entry is not found                                                                                                                         |
-| input      | lookup-only          | See if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache                                                               |
-| output     | cache-hit            | Simple boolean to indicate if an exact match is found for a key                                
+| input      | ```path```          | A list of files/directories/patterns that specify which file system objects to include in the cache and restore from it                                             |
+| input      | ```key```      | An explicit key to use for saving and restoring the cache                                                                                                          |
+| input      | ```restore-keys```         | An ordered list of keys to check to indicate that a match occurred with the key; a match here is referred to as a cache hit                                         |
+| input      | ```upload-chunk-size```    | Chunk size used to split up large files during upload, in bytes                                                                                                    |
+| input      | ```enableCrossOs​Arch⁠ive``` | Optional boolean—allows Windows runners to save or restore caches that can be restored or saved respectively on other platforms                                   |
+| input      | ```fail-on-cache-miss```   | Fail workflow if cache entry is not found                                                                                                                         |
+| input      | ```lookup-only```          | See if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache                                                               |
+| output     | ```cache-hit```           | Simple boolean to indicate if an exact match is found for a key                                
 
 ## Advanced Triggering Workflows
 There’s the on keyword introducing the section of events that trigger running this workflow and then the issues trigger below that. It may look a bit strange to have a trigger with simply an ending colon and nothing after that, but it is valid syntax. The implication of this is that this workflow will be triggered for any and every kind of activity that occurs for an issue, such as creation, updating, or deletion.
@@ -90,11 +90,11 @@ If you are triggering off of a push or pull request event, you can refine those 
 
 ## Triggering workflows without a change
 
-workflow_dispatch: This event allows you to manually trigger a workflow from the GitHub Actions tab. You can provide input parameters and run the workflow on-demand. It doesn't automatically run; you have to initiate it manually.
+```workflow_dispatch```: This event allows you to manually trigger a workflow from the GitHub Actions tab. You can provide input parameters and run the workflow on-demand. It doesn't automatically run; you have to initiate it manually.
 
-workflow_call: This event allows you to call a reusable workflow from another workflow. You can specify input parameters, and the called workflow runs as part of the calling workflow. It can be used when you want to reuse a set of workflow steps across different workflows.
+```workflow_call```: This event allows you to call a reusable workflow from another workflow. You can specify input parameters, and the called workflow runs as part of the calling workflow. It can be used when you want to reuse a set of workflow steps across different workflows.
 
-workflow_run: This event allows you to trigger the run of one workflow based on another workflow's execution. You can specify conditions such as which workflow to trigger (workflows), when to trigger it (types), and on which branches or conditions it should run. For example, you can set it up so that when a workflow named "Pipeline" completes, it triggers another workflow to perform additional tasks, such as deployment.
+```workflow_run```: This event allows you to trigger the run of one workflow based on another workflow's execution. You can specify conditions such as which workflow to trigger (workflows), when to trigger it (types), and on which branches or conditions it should run. For example, you can set it up so that when a workflow named "Pipeline" completes, it triggers another workflow to perform additional tasks, such as deployment.
 Here's an example scenario for workflow_run:
 
 ```
@@ -109,7 +109,7 @@ on:
 
 In this example, when a workflow named "Pipeline" completes (either successfully or with a failure), it triggers the defined workflow to run. It only runs on branches starting with "rel" but excludes branches ending with "-preprod."
 
-repository_dispatch: This event allows external events to trigger workflows in your repository. You can set up custom events and payloads that can be used by external systems or scripts to trigger specific workflows. It's useful when you want to automate workflows based on events outside of GitHub. For example, you could trigger a deployment workflow when a specific event occurs in an external CI/CD system.
+```repository_dispatch```: This event allows external events to trigger workflows in your repository. You can set up custom events and payloads that can be used by external systems or scripts to trigger specific workflows. It's useful when you want to automate workflows based on events outside of GitHub. For example, you could trigger a deployment workflow when a specific event occurs in an external CI/CD system.
 Here's a high-level scenario for repository_dispatch:
 
 You have a CI/CD system external to GitHub.
