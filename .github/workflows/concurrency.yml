@@ -1,0 +1,24 @@
+name: CD Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    concurrency:
+      group: production-deployment
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Production
+        run: |
+          # Your deployment script goes here
+          # This script deploys your application to the production server
+        env:
+          PRODUCTION_SERVER: ${{ secrets.PRODUCTION_SERVER }}
+          DEPLOYMENT_KEY: ${{ secrets.DEPLOYMENT_KEY }}

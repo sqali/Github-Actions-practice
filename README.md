@@ -109,6 +109,10 @@ on:
 
 In this example, when a workflow named "Pipeline" completes (either successfully or with a failure), it triggers the defined workflow to run. It only runs on branches starting with "rel" but excludes branches ending with "-preprod."
 
+The completed status here means that the pipeline ran to completion, which could be either success or failure. Alternatively, you can also use a status of requested, which implies only that the other workflow has been triggered. In that use case, this workflow would run at effectively the same time as the other one.
+
+Note that there is also a requested status for the workflow_run event. That allows you to sequence execution of workflows in a similar manner, as the needs keyword allows you to sequence execution of jobs within a workflow.
+
 repository_dispatch: This event allows external events to trigger workflows in your repository. You can set up custom events and payloads that can be used by external systems or scripts to trigger specific workflows. It's useful when you want to automate workflows based on events outside of GitHub. For example, you could trigger a deployment workflow when a specific event occurs in an external CI/CD system.
 Here's a high-level scenario for repository_dispatch:
 
@@ -117,3 +121,39 @@ This external system detects a new version of your software.
 The CI/CD system sends a custom "release" event to your GitHub repository using the repository_dispatch API.
 GitHub triggers a specific workflow in your repository, such as a deployment workflow, in response to the custom "release" event.
 These events give you flexibility in automating workflows in response to various conditions, whether it's manual initiation (workflow_dispatch), reusing workflows in other workflows (workflow_call), or responding to external events (workflow_run and repository_dispatch).
+
+## Dealing with Concurrency
+
+Imagine you have a repository where you use GitHub Actions for Continuous Deployment (CD) to automatically deploy your web application to a production server whenever changes are pushed to the main branch. You want to ensure that only one deployment is happening at a time to avoid conflicts and overloading your production server.
+
+This workflow triggers whenever changes are pushed to the main branch.
+
+In the deploy job, we use the concurrency keyword with the group name "production-deployment." This ensures that only one instance of the deployment job with this group name can run at a time.
+
+We set cancel-in-progress: true to make sure that if a new deployment is triggered while an existing one is still running (e.g., due to rapid successive pushes), the new deployment cancels the previous one to avoid conflicts.
+
+Inside the deploy job, we have steps to check out the code from the repository and then run the deployment script, which deploys the application to the production server. We use secrets to securely store sensitive information like server credentials.
+
+Consider this scenario:
+
+Developer A pushes a change to the main branch, triggering the CD workflow.
+Simultaneously, Developer B pushes another change to the main branch.
+Without the concurrency setting, both Developer A and Developer B's workflow instances would start concurrently, and both might try to deploy to the production server simultaneously, which could lead to conflicts and issues.
+
+With the concurrency setting:
+
+When Developer A's workflow starts, it will create a "lock" in the "production-deployment" concurrency group. This means no other workflow instance with the same concurrency group can start the deploy job until Developer A's workflow completes.
+
+If Developer B's workflow starts while Developer A's workflow is still running, it checks the concurrency group and sees that an instance with the same group name is already running (Developer A's workflow). In this case, Developer B's workflow will wait or be canceled, depending on the cancel-in-progress setting.
+
+Regarding the concept of the "group" in concurrency:
+
+The "group" is simply a label or identifier that you assign to a concurrency setting. It can be any string or expression you choose.
+
+When multiple jobs or workflows use the same concurrency group, they effectively compete for access to resources. Only one job or workflow with the same concurrency group can run at a time.
+
+You use this group name to group related jobs or workflows that should not run concurrently. In the example, "production-deployment" is used to group all instances of the deploy job within the same workflow.
+
+It's a way to coordinate and control access to shared resources, ensuring that potentially conflicting actions don't happen simultaneously.
+
+So, by assigning a common "group" name to related jobs or workflows, you can ensure that only one instance of those jobs or workflows runs at a time, even if multiple instances of the same workflow are triggered simultaneously.
