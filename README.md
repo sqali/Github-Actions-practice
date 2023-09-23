@@ -80,8 +80,8 @@ on:
     paths:
       - 'module1/**'
       - '!module1/data/**'
-      
-# if anything is changed within module1 then it will be triggered but if the change is also within module1/data then it will not triggered as it has been specified
+
+if anything is changed within module1 then it will be triggered but if the change is also within module1/data then it will not triggered as it has been specified
 ```
 
 If you’re not familiar with the meaning of the ** symbol, in glob syntax, it matches filenames and directories recursively. Essentially, it matches on anything in a tree structure under the specified path.
@@ -109,15 +109,12 @@ on:
 
 In this example, when a workflow named "Pipeline" completes (either successfully or with a failure), it triggers the defined workflow to run. It only runs on branches starting with "rel" but excludes branches ending with "-preprod."
 
-<<<<<<< HEAD
 The completed status here means that the pipeline ran to completion, which could be either success or failure. Alternatively, you can also use a status of requested, which implies only that the other workflow has been triggered. In that use case, this workflow would run at effectively the same time as the other one.
 
 Note that there is also a requested status for the workflow_run event. That allows you to sequence execution of workflows in a similar manner, as the needs keyword allows you to sequence execution of jobs within a workflow.
 
 repository_dispatch: This event allows external events to trigger workflows in your repository. You can set up custom events and payloads that can be used by external systems or scripts to trigger specific workflows. It's useful when you want to automate workflows based on events outside of GitHub. For example, you could trigger a deployment workflow when a specific event occurs in an external CI/CD system.
-=======
-```repository_dispatch```: This event allows external events to trigger workflows in your repository. You can set up custom events and payloads that can be used by external systems or scripts to trigger specific workflows. It's useful when you want to automate workflows based on events outside of GitHub. For example, you could trigger a deployment workflow when a specific event occurs in an external CI/CD system.
->>>>>>> ca5fd9f3f809666fb0e2541e21f7ee9b60b4f5c0
+
 Here's a high-level scenario for repository_dispatch:
 
 You have a CI/CD system external to GitHub.
@@ -125,7 +122,7 @@ This external system detects a new version of your software.
 The CI/CD system sends a custom "release" event to your GitHub repository using the repository_dispatch API.
 GitHub triggers a specific workflow in your repository, such as a deployment workflow, in response to the custom "release" event.
 These events give you flexibility in automating workflows in response to various conditions, whether it's manual initiation (workflow_dispatch), reusing workflows in other workflows (workflow_call), or responding to external events (workflow_run and repository_dispatch).
-<<<<<<< HEAD
+
 
 ## Dealing with Concurrency
 
@@ -162,5 +159,3 @@ You use this group name to group related jobs or workflows that should not run c
 It's a way to coordinate and control access to shared resources, ensuring that potentially conflicting actions don't happen simultaneously.
 
 So, by assigning a common "group" name to related jobs or workflows, you can ensure that only one instance of those jobs or workflows runs at a time, even if multiple instances of the same workflow are triggered simultaneously.
-=======
->>>>>>> ca5fd9f3f809666fb0e2541e21f7ee9b60b4f5c0
