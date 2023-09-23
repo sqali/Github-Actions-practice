@@ -240,3 +240,69 @@ jobs:
       - run: echo ${{ needs.create-new-issue.outputs.issue-num }}
 
 ```
+
+## Workflow Functions
+
+There are a number of functions built in for use in workflows. Some of them provide convenient ways to inspect, format, or transform strings or other values.
+
+| Function   | Purpose                                                                  | Usage                                     |
+|------------|--------------------------------------------------------------------------|-------------------------------------------|
+| contains   | Checks if item is contained in a string or array. Return true if found. | `contains(search, item)`                 |
+| startsWith | Checks if a string starts with a particular value.                       | `startsWith(searchString, searchValue)`   |
+| endsWith   | Checks if a string ends with a particular value.                         | `endsWith(searchString, searchValue)`     |
+| format     | Within a given string, replaces occurrences of {0}, {1}, {2}, etc. with the replacement values in the given order. | `format(string, replaceValue0, replaceValue1, ..., replaceValueN)` |
+| join       | Concatenates values in the array together into a string; uses comma as the default separator, but a different separator can be specified. | `join(array, optionalSeparator)`         |
+| toJSON     | Pretty prints the specified value in JSON format.                       | `toJSON(value)`                           |
+| fromJSON   | Returns a JSON object or JSON datatype from the given value; useful to convert env variables from a string to another data type (such as boolean or integer) if needed. | `fromJSON(value)`                         |
+| hashFiles  | Returns a hash for the set of files that match the path specified.       | `hashFiles(path)`                         |
+
+## Conditionals and Status Functions
+
+You can use an if clause at the start of a job or a step to check a condition and determine if execution should occur or not. This can be done in a couple of ways.
+
+You can check if context values are related to specific values. For example, the following code checks to see if the event is occurring on the main branch before allowing the job to execute. It also checks the value of the os property for the runner and reports information as part of a step:
+
+```
+name: Example workflow
+
+on:
+  push:
+
+jobs:
+    
+  report:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/test'
+    steps:
+      - name: check-os
+        if: runner.os != 'Windows'
+        run: echo "The runner's operating system is $RUNNER_OS."
+```
+
+Also available are a set of status functions that can be used with conditionals to determine whether to execute a job or a step. Table 8-2 shows the status functions along with explanations and example usage.
+
+| Function   | Meaning                                                                       |
+|------------|-------------------------------------------------------------------------------|
+| success()  | Returns true when none of the previous steps have been failed or cancelled  |
+| always()   | Returns true and always proceeds even if the workflow has been cancelled    |
+| cancelled()| Returns true if the workflow was cancelled                                  |
+| failure()  | When used with steps, returns true if a previous step failed; when used with jobs, returns true if a previous ancestor job (one that was in the dependency path) failed |
+
+
+The syntax for these is fairly straightforward. You can write them as if: ${{ success() }}, but you can also use the simpler form of if: success(). And you can combine them with logical operators. An example of this is shown here:
+
+```
+create-issue-on-failure:
+    
+    permissions:
+      issues: write
+    needs: [test-run, count-args]
+    if: always() && failure()
+    uses: ./.github/workflows/create-failure-issue.yml 
+In this case, I am always checking for a failure, so I can create a GitHub issue to document the failure condition.
+```
+
+DON’T ALWAYS RELY ON ALWAYS()
+In situations where you want to run a job or step regardless of success or failure and the potential for a critical failure may occur, it is best not to rely on always(). This is because you may end up waiting for a timeout to occur. The recommended approach for this situation is to use if: success() || failure() instead.
+
+Finally, there is also a timeout-minutes setting that can be used to specify the maximum number of minutes that a job should be allowed to run before cancelling it. The default is 360.
