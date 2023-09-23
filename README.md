@@ -159,3 +159,51 @@ You use this group name to group related jobs or workflows that should not run c
 It's a way to coordinate and control access to shared resources, ensuring that potentially conflicting actions don't happen simultaneously.
 
 So, by assigning a common "group" name to related jobs or workflows, you can ensure that only one instance of those jobs or workflows runs at a time, even if multiple instances of the same workflow are triggered simultaneously.
+
+```
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    concurrency:
+      group: ${{ github.ref }}
+      cancel-in-progress: true
+```
+
+To ensure that your concurrency group is unique to your workflow (to avoid cancelling other workflows in the same repository unintentionally), you can add the workflow property from the github context to it, as follows:
+
+```
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+USING UNDEFINED CONTEXT VALUES IN CONCURRENCY GROUPS
+Be aware that since some context values are only defined for certain types of events, if you use them in concurrency group specifications and the triggering event does not provide that value, you will end up with a syntax error. For example, assume I have the following code:
+
+```
+on:
+  push:      
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+        
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+```   
+
+Since the head_ref property of the github context is only defined when a pull request is done, if I did a push with this code, I would get a syntax error because the head_ref property is undefined on a push.
+
+Here’s an example of such an error:
+
+The workflow is not valid. .github/workflows/simple-pipe.yml (Line: 22,
+Col: 14): Unexpected value ''
+To prevent this, you can use a logical OR operation to have a fallback:
+
+```
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+```
