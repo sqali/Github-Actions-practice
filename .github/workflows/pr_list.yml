@@ -8,35 +8,23 @@ on:
     workflow_dispatch:
 
 jobs:
-    create-issue-gh-cli:
+    list_PRs:
         runs-on: ubuntu-latest
         steps:
+            - name: Extraction PRs using GraphQL API
+              run: |
+                  TOKEN="${{ secrets.GITHUB_TOKEN }}"
 
-        - name: Installing GitHub CLI if not present in the system
-          # Installing github cli if not installed
-          run: |
-            if ! command -v gh &> /dev/null; then 
-                echo "GitHub CLI not found. Installing..."
-                sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-                sudo apt-add-repository https://cli.github.com/packages
-                sudo apt update
-                sudo apt install gh
-            fi
-            
-        - name: Authentication with GitHub using PAT
-          run: |
-              echo "Authenticating with GitHub using Personal Access Token"
-              gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
-              
-        - name: Fetching all pull requests
-          run: |
-              gh pr list --author sqali > pull_requests_list.txt
-              cat pull_requests_list.txt
+                  QUERY='query {viewer {pullRequests(first: 100, states: [OPEN, CLOSED, MERGED]) {nodes {title}}}}'
 
-        - name: Upload a Build Artifact
-          uses: actions/upload-artifact@v3.1.3
-          with:
-            name: pull_requests_list
-            path: pull_requests_list.txt
-        
+                  curl -H "Authorization: bearer ${TOKEN}" -X POST -d "{'query': '$QUERY'}" \https://api.github.com/graphql > pull_requests.json
+                  jq '.data.viewer.pullRequests.nodes[].title' pull_requests.json > pull_requests_list.txt
+                  
+                  cat pull_requests_list.txt
+
+            - name: Upload a Build Artifact
+              uses: actions/upload-artifact@v3.1.3
+              with:
+                name: pull_requests_list
+                path: pull_requests_list.txt
         # Checkout the code and use the python file to filter out the PR list
