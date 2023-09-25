@@ -15,7 +15,7 @@ jobs:
             - name: Authenticating to GitHub Account
               run: |
                 gh auth login --with-token <<<"${{ secrets.GITHUB_TOKEN }}"
-                gh pr list --author sqali --all > pull_requests_list.txt
+                gh pr list --author sqali > pull_requests_list.txt
                 cat pull_requests_list.txt
 
             - name: Upload a Build Artifact
