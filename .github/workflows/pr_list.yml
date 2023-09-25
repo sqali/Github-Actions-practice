@@ -12,9 +12,14 @@ jobs:
         runs-on: [ubuntu-latest]
 
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+              with:
+                ref: ${{ github.ref }}
+                
             - name: Authenticating to GitHub Account
               run: |
-                gh auth login --with-token <<<"${{ secrets.GITHUB_TOKEN }}"
+                gh auth login --with-token <<<"${{ secrets.GH_PAT }}"
                 gh pr list --author sqali > pull_requests_list.txt
                 cat pull_requests_list.txt
 
