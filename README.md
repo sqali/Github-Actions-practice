@@ -306,15 +306,3 @@ DON’T ALWAYS RELY ON ALWAYS()
 In situations where you want to run a job or step regardless of success or failure and the potential for a critical failure may occur, it is best not to rely on always(). This is because you may end up waiting for a timeout to occur. The recommended approach for this situation is to use if: success() || failure() instead.
 
 Finally, there is also a timeout-minutes setting that can be used to specify the maximum number of minutes that a job should be allowed to run before cancelling it. The default is 360.
-
-### Source
-
-The following examples are adapted from the book "Learning GitHub Actions" by Brent Laster.
-
-- **Author:** Brent Laster
-- **Book Title:** Learning Github Actions: Automation and Integration of CI/CD with Github
-- **Publication Year:** 2023
-- **Publisher:** O'Reilly Media
-- **Pages:** 398
-
-[Link to book](https://www.amazon.in/Learning-Github-Actions-Automation-Integration/dp/109813107X/ref=tmm_pap_swatch_0?_encoding=UTF8&qid=1695638341&sr=8-1)

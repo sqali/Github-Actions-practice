@@ -13,7 +13,6 @@ jobs:
           input_string="Hello, world! This is a sample text."
           specific_word="sample"
 
-          # Using contains function
           if contains("$input_string", "$specific_word"); then
             echo "The input string contains the word '$specific_word'."
             echo "Output: ${{ steps.contains_check.outputs.result }}"
@@ -27,7 +26,6 @@ jobs:
           input_string="GitHub Actions"
           start_value="GitHub"
 
-          # Using startsWith function
           if startsWith("$input_string", "$start_value"); then
             echo "The input string starts with '$start_value'."
           else
@@ -40,7 +38,6 @@ jobs:
           input_string="Hello, world!"
           end_value="world!"
 
-          # Using endsWith function
           if endsWith("$input_string", "$end_value"); then
             echo "The input string ends with '$end_value'."
           else
@@ -54,7 +51,6 @@ jobs:
           name="John"
           location="GitHub Actions"
 
-          # Using format function
           formatted_string=$(format("$original_string", "$name", "$location"))
           echo "Formatted String: $formatted_string"
 
@@ -62,8 +58,6 @@ jobs:
         id: join_example
         run: |
           array=("GitHub" "Actions" "Demo")
-
-          # Using join function
           joined_string=$(join("${{ array }}", ", "))
           echo "Joined String: $joined_string"
 
@@ -71,8 +65,6 @@ jobs:
         id: to_json_example
         run: |
           value="{'key': 'value'}"
-
-          # Using toJSON function
           json_value=$(toJSON("$value"))
           echo "JSON Value: $json_value"
 
@@ -81,7 +73,6 @@ jobs:
         run: |
           json_value='{"key": "value"}'
 
-          # Using fromJSON function
           original_value=$(fromJSON("$json_value"))
           echo "Original Value: $original_value"
 
@@ -90,6 +81,5 @@ jobs:
         run: |
           file_path="path/to/files/*"
 
-          # Using hashFiles function
           hash=$(hashFiles("$file_path"))
           echo "Hash Value: $hash"
