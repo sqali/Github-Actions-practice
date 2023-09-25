@@ -1,0 +1,27 @@
+name: List of Pull Requests
+
+on:
+    push:
+        branches:
+            main
+
+    workflow_dispatch:
+
+jobs:
+    list_of_PRs:
+        runs-on: [ubuntu-latest]
+
+        steps:
+            - name: Authenticating to GitHub Account
+              run: |
+                gh auth login --with-token <<<"${{ secrets.GITHUB_TOKEN }}"
+                gh pr list --author sqali --all > pull_requests_list.txt
+                cat pull_requests_list.txt
+
+            - name: Upload a Build Artifact
+              uses: actions/upload-artifact@v3.1.3
+              with:
+                name: pull_requests_list
+                path: pull_requests_list.txt
+        
+        # Checkout the code and use the python file to filter out the PR list
