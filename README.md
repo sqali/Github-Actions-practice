@@ -315,7 +315,10 @@ Suppose you maintain a vibrant GitHub repository. Your project has a substantial
 
 ```
 - name: GitHub Script
-  uses: actions/github-script@v2.1.0            
+  uses: actions/github-script@v2.1.0
+  with:
+    github-token: ${{ secrets.GH_PAT }}
+    script: |        
 ```
 
 ### Source
