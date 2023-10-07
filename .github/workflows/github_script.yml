@@ -1,0 +1,27 @@
+name: Using GitHub script (predefined actions) to automate stuff
+
+on:
+    issues:
+        types: [opened]
+
+    workflow_dispatch:
+
+jobs:
+    comment:
+        name: commenting on an issue
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.1.0
+            - name: GitHub Script
+              uses: actions/github-script@v2.1.0
+              with:
+                github-token: ${{ secrets.GH_PAT }}
+                script: |
+                    github.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: "🎉 You've created this issue comment using GitHub Script!!!"
+                      })
