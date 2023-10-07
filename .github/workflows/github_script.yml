@@ -15,7 +15,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4.1.0
             - name: GitHub Script
-            - uses: actions/github-script@0.8.0
+              uses: actions/github-script@0.8.0
               with:
                 github-token: ${{secrets.GH_PAT}}
                 script: |
