@@ -321,6 +321,202 @@ Suppose you maintain a vibrant GitHub repository. Your project has a substantial
     script: |        
 ```
 
+## Build and deploy web applications using Microsoft Azure
+
+Options for triggering a CD workflow
+There are several options for starting a CD workflow. Let's talk about a few of them.
+
+In the previous module on CI with GitHub Actions, you learned how to trigger a workflow from a push to the GitHub repository. However, for CD, you may want to trigger a deployment workflow on some other event.
+
+One option is to trigger the workflow with ChatOps. ChatOps uses chat clients, chatbots, and real-time communication tools to execute tasks. For example, you might leave a specific comment in a pull request that can kick off a bot. That bot might comment back with some statistics or run a workflow.
+
+Another option, and the one we use in our example, is to use labels in your pull request. Different labels can start different workflows. For example, add a stage label to begin a deployment workflow to your staging environment, or add a spin-up environment label to run the workflow that creates the Microsoft Azure resources you'll deploy to. To use labels, your workflow will look like this:
+
+```
+on:
+  pull_request:
+    types: [labeled]
+```
+
+Control execution with a job conditional
+Often, you only want to run a workflow if some condition is true.
+
+GitHub workflows provide the if conditional for this scenario. The conditional uses an expression that will be evaluated at runtime. For example, we want to run this workflow if a stage label is added to the pull request.
+
+```if: contains(github.event.pull_request.labels.*.name, 'stage')```
+
+Store credentials with GitHub Secrets
+You never want to expose sensitive information in the workflow file. GitHub Secrets is a secure place to store sensitive information that your workflow will need. Here's an example.
+
+In order to deploy to an Azure resource, the GitHub Action must have permission to access the resource. You don't want to store your Azure credentials in plain sight in the workflow file. Instead, you can store your credentials in GitHub Secrets.
+
+To store information in GitHub Secrets, you'll create a secret on the portal.
+
+Then, you'll use the name of the secret you created in your workflow wherever you need that information. For example, here we'll use the Azure credential that was stored in GitHub Secrets in the creds: attribute of an Azure login action.
+
+```
+steps:
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+```
+
+### Deploy to Microsoft Azure using GitHub Actions
+
+
+1. **Workflow Setup**:
+   - `name: Deploy-to-Azure`: This is the name of the workflow.
+   - `runs-on: ubuntu-latest`: Specifies that this workflow will run on a GitHub-hosted runner using the latest version of the Ubuntu operating system.
+   - `needs: Build-Docker-Image`: Indicates that this workflow depends on the completion of another workflow named "Build-Docker-Image." It ensures that the Docker image is built before deployment.
+
+2. **Login via Azure CLI**:
+   - `uses: azure/login@v1`: This step utilizes the "azure/login" GitHub Action to log in to Azure using Azure CLI.
+   - `with:`: This section provides input parameters for the Action.
+   - `creds: ${{ secrets.AZURE_CREDENTIALS }}`: It specifies the Azure credentials stored in GitHub Secrets for secure authentication.
+
+3. **Docker Login**:
+   - `uses: azure/docker-login@v1`: This step uses the "azure/docker-login" GitHub Action to log in to a Docker registry hosted on Azure.
+   - `with:`: Provides input parameters.
+   - `login-server: ${{env.IMAGE_REGISTRY_URL}}`: Specifies the URL of the Docker registry, which is retrieved from an environment variable.
+   - `username: ${{ github.actor }}`: Uses the GitHub actor's username as the Docker login username.
+   - `password: ${{ secrets.GITHUB_TOKEN }}`: Utilizes the GitHub token from GitHub Secrets as the Docker login password. This token has the necessary permissions for Docker operations.
+
+4. **Deploy Web App Container**:
+   - `uses: azure/webapps-container-deploy@v1`: This step deploys a Docker container to an Azure Web App.
+   - `with:`: Provides input parameters.
+   - `app-name: ${{env.AZURE_WEBAPP_NAME}}`: Specifies the name of the Azure Web App where the Docker container will be deployed, using an environment variable.
+   - `images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{ github.sha }}`: Sets the Docker image location, which includes the Docker image URL, repository name, image name, and the Git commit SHA as a tag. This ensures that the latest image built from the current commit is deployed.
+
+5. **Azure Logout**:
+   - `name: Azure logout`: This step provides a name for the step.
+   - `run:`: Specifies a shell command to run.
+   - `az logout`: It runs the Azure CLI command to log out from the Azure account, ensuring a clean logout.
+
+This workflow, in summary, logs in to Azure, logs in to the Docker registry, deploys the Docker container to an Azure Web App, and finally logs out from Azure. It ensures that the deployment process is executed securely and efficiently, integrating GitHub Actions with Azure services.
+
+```
+Deploy-to-Azure:
+    runs-on: ubuntu-latest
+    needs: Build-Docker-Image
+    name: Deploy app container to Azure
+    steps:
+      - name: "Login via Azure CLI"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{env.IMAGE_REGISTRY_URL}}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy web app container
+        uses: azure/webapps-container-deploy@v1
+        with:
+          app-name: ${{env.AZURE_WEBAPP_NAME}}
+          images: ${{env.IMAGE_REGISTRY_URL}}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME}}:${{ github.sha }}
+
+      - name: Azure logout
+        run: |
+          az logout
+```
+
+### Create and delete Azure resources by using GitHub Actions
+
+Because CD is an automated process, you've already decided to use infrastructure as code to create and take down the environments you deploy to. GitHub Actions can automate these tasks on Azure, and you can include these actions in your workflow.
+
+Remember that it's important to tear down resources that you're no longer using as soon as possible to avoid unnecessary charges.
+
+One option is to create a new workflow with two jobs, one that spins up resources and one that deletes them. Then, use a conditional to run only the job you want. In this example, the conditional looks for a label in the pull request and runs the set-up-azure-resources job if the label is a spin-up environment and the destroy-azure-resources job if the label is destroy environment.
+
+```
+jobs:
+  set-up-azure-resources:
+    runs-on: ubuntu-latest
+
+    if: contains(github.event.pull_request.labels.*.name, 'spin up environment')
+
+    ...
+
+  destroy-azure-resources:
+    runs-on: ubuntu-latest
+
+    if: contains(github.event.pull_request.labels.*.name, 'destroy environment')
+
+    ...
+```
+
+Here's an example of the steps in the set-up-azure-resources job:
+
+Certainly, let's break down the provided GitHub Actions workflow step by step:
+
+1. **Checkout repository:**
+   - Uses the `actions/checkout@v2` action to clone the repository into the GitHub Actions runner.
+   - This step fetches the source code and makes it available for the workflow.
+
+2. **Azure login:**
+   - Uses the `azure/login@v1` action to log in to Azure using the Azure Service Principal credentials stored in the GitHub repository's secrets.
+   - This step provides authentication so that subsequent Azure CLI commands can be executed.
+
+3. **Create Azure resource group:**
+   - Conditionally executed with the `if: success()` condition, meaning it runs if the previous steps were successful.
+   - Uses the Azure CLI (`az`) to create an Azure Resource Group.
+   - The location and name of the resource group are determined by environment variables (`AZURE_LOCATION` and `AZURE_RESOURCE_GROUP`).
+   - It also specifies the Azure subscription ID from GitHub Secrets.
+
+4. **Create Azure app service plan:**
+   - Conditionally executed with the `if: success()` condition.
+   - Uses the Azure CLI to create an Azure App Service Plan.
+   - The plan is created in the specified resource group (`AZURE_RESOURCE_GROUP`) and with the provided name (`AZURE_APP_PLAN`).
+   - This command specifies that it's a Linux-based plan (`--is-linux`), with the F1 pricing tier (`--sku F1`).
+
+5. **Create webapp resource:**
+   - Conditionally executed with the `if: success()` condition.
+   - Uses the Azure CLI to create an Azure Web App.
+   - The web app is created in the specified resource group (`AZURE_RESOURCE_GROUP`), using the specified app service plan (`AZURE_APP_PLAN`).
+   - It also specifies the name of the web app (`AZURE_WEBAPP_NAME`) and the Docker container image to use (`nginx` in this case).
+   - This command specifies the Azure subscription ID from GitHub Secrets.
+
+6. **Configure webapp to use GitHub Packages:**
+   - Conditionally executed with the `if: success()` condition.
+   - Uses the Azure CLI to configure the Azure Web App to use a Docker container image from GitHub Packages.
+   - It sets the custom Docker image name to `nginx` and configures the Docker registry server URL to GitHub Packages (`https://docker.pkg.github.com`).
+   - The GitHub actor's username and GitHub token (`secrets.GITHUB_TOKEN`) are used for authentication.
+   - This step ensures that the web app pulls the specified Docker image from GitHub Packages when deployed.
+
+The workflow as a whole automates the process of setting up Azure resources, including a resource group, an app service plan, and a web app. It also configures the web app to use a Docker container image from GitHub Packages. The conditional execution ensures that these steps only run if the previous steps are successful, preventing unnecessary resource creation in case of workflow failures.
+
+```
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v2
+
+  - name: Azure login
+    uses: azure/login@v1
+    with:
+      creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  - name: Create Azure resource group
+    if: success()
+    run: |
+      az group create --location ${{env.AZURE_LOCATION}} --name ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+  - name: Create Azure app service plan
+    if: success()
+    run: |
+      az appservice plan create --resource-group ${{env.AZURE_RESOURCE_GROUP}} --name ${{env.AZURE_APP_PLAN}} --is-linux --sku F1 --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+  - name: Create webapp resource
+    if: success()
+    run: |
+      az webapp create --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --plan ${{ env.AZURE_APP_PLAN }} --name ${{ env.AZURE_WEBAPP_NAME }}  --deployment-container-image-name nginx --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+  - name: Configure webapp to use GitHub Packages
+    if: success()
+    run: |
+      az webapp config container set --docker-custom-image-name nginx --docker-registry-server-password ${{secrets.GITHUB_TOKEN}} --docker-registry-server-url https://docker.pkg.github.com --docker-registry-server-user ${{github.actor}} --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+```
+
+
 ### Source
 
 The following examples are adapted from the book "Learning GitHub Actions" by Brent Laster.
@@ -332,3 +528,7 @@ The following examples are adapted from the book "Learning GitHub Actions" by Br
 - **Pages:** 398
 
 [Link to book](https://www.amazon.in/Learning-Github-Actions-Automation-Integration/dp/109813107X/ref=tmm_pap_swatch_0?_encoding=UTF8&qid=1695638341&sr=8-1)
+
+Websites referred
+
+[https://learn.microsoft.com/en-us/training/modules/github-actio](https://learn.microsoft.com/en-us/training/paths/automate-workflow-github-actions/)
